@@ -39,7 +39,7 @@ pipeline {
 
      stage ('Push') {
         steps {
-            sh 'docker push morenodoesinfra/bankingapp'
+            sh 'docker push morenodoesinfra/bankingappd7'
   }
      }
 

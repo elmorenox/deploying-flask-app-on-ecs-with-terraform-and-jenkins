@@ -4,4 +4,3 @@
 jenkins-tf/.terraform/
 jenkins-tf/variables.tf
 intTerraform/.terraform/
-

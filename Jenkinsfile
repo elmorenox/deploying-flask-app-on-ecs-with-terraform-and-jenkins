@@ -76,6 +76,7 @@ pipeline {
          }
     }
    }
+  /* 
  stage('Destroy') {
     agent {label 'awsDeploy'}
     steps {
@@ -87,6 +88,6 @@ pipeline {
           }
     }
 }
-
+*/
   }
 }

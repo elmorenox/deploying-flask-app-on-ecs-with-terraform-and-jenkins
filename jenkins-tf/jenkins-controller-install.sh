@@ -24,24 +24,14 @@ sudo apt-get install -y build-essential
 sudo apt-get install -y libmysqlclient-dev
 sudo apt-get install -y python3.7-dev
 
-if [ "$argument" == "node" ]:
-    curl -fsSL https://get.docker.com -o get-docker.sh
-    sudo sh get-docker.sh
 
-    sudo groupadd docker || true
-    sudo usermod -aG docker $USER  || true
+sudo usermod -aG sudo jenkins || true
 
-    newgrp docker
+sudo su - jenkins -c "
+    ssh-keygen -t rsa -N '' -f /var/lib/jenkins/.ssh/id_rsa -q
+    sudo chmod 600 /var/lib/jenkins/.ssh/id_rsa
+    sudo chmod 600 /var/lib/jenkins/.ssh/id_rsa.pub
+"
 
-    sudo apt-get install -y default-jre
-else
-    sudo usermod -aG sudo jenkins || true
-
-    sudo su - jenkins -c "
-        ssh-keygen -t rsa -N '' -f /var/lib/jenkins/.ssh/id_rsa -q
-    "
-    sudo chmod 770 /var/lib/jenkins/.ssh/id_rsa
-    sudo chmod 770 /var/lib/jenkins/.ssh/id_rsa.pub
-fi
 
 echo "Script completed at: $(date)"

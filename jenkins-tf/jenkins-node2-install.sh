@@ -2,7 +2,8 @@
 exec > >(tee -a /var/log/user-data.log) 2>&1
 echo "Script started at: $(date)"
 
-sudo apt-get update && sudo apt-get -y install default-jre
+sudo apt-get update && sudo apt install -y fontconfig openjdk-17-jre
+sudo apt-get -y install default-jre
 
 sudo apt-get update && sudo apt-get install -y gnupg software-properties-common
 wget -O- https://apt.releases.hashicorp.com/gpg | \

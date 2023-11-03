@@ -3,5 +3,5 @@
 *.tfstate.backup
 jenkins-tf/.terraform/
 jenkins-tf/variables.tf
-initTerraform/.terraform
+intTerraform/.terraform/
 

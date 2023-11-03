@@ -28,7 +28,7 @@ pipeline {
      
     stage ('Build') {
       steps {
-          sh 'docker build -t morenodoesinfra/bankingapp .'
+          sh 'docker build -t morenodoesinfra/bankingappd7 .'
     }
 }
      stage ('Login') {

@@ -10,7 +10,7 @@ This repository contains Terrafrom code for a Jenkins controllers-agent infrastr
 
 The VPC is created by the Terraform code in [/intTerraform/vpc.tf](/intTerraform/vpc.tf) and includes the following resources:
 
-1. 2 Availability Zones, each with a public and private subnet. **Having two availability zones allows for high availability and fault tolerance.**
+1. 2 Availability Zones, each with a public and private subnet. **Two availability zones creates some redundancy in the region in case one data center experiences interruptions.**
 
 - **The private subnets host the Fargate instances for the Docker containers with the Flask application**
 - The public subnets each serve to route traffic from the internet to the private subnets via the application load balancer
@@ -38,7 +38,7 @@ The ECS cluster is created by the Terraform code in [/intTerraform/main.tf](/int
 
 1. ECS cluster
    - An is a grouping of servers, in this case Fargate instances. The Fargate instances host the Docker containers with the Flask application
-   - **The Fargate instances are places in a private subnet and are not accessible from the internet but can access the internet via the NAT gateway. This is a security measure to prevent the Fargate instances from being accessed directly from the internet**
+   - **The Fargate instances are places in a private subnet and are not accessible from the internet but can access the internet via the NAT gateway. This is a security practice to prevent the Fargate instances from being accessed directly from the internet**
 2. ECS task definition
    - The task definition is a blueprint for the Docker container that includes the Docker image, port mappings, and resource requirements
 3. ECS service
@@ -50,7 +50,7 @@ The ECS cluster is created by the Terraform code in [/intTerraform/main.tf](/int
 
 ### Changes to main.tf
 
-If you are using another application to this ECS cluster, you'll need to make the following changes to the main.tf file:
+If you are using another application to deploy to this ECS cluster, you'll need to make the following changes to the main.tf file:
 
 1. **Cluster Name**: Replace the placeholder with the name of your ECS cluster.
 2. **Task Definition**:
@@ -59,8 +59,8 @@ If you are using another application to this ECS cluster, you'll need to make th
      - **name**: Name your container
      - **image**: If you are using Docker Hub,the format is username/image:tag.
      - **containerPort**: Replace the placeholder with the port the container is listening on. This Flask application is served by Gunicorn on port 8000.
-   - **execution_role_arn**:
-   - **task_role_arn**:
+   - **execution_role_arn**: IAM role
+   - **task_role_arn**: IAM role
 3. **ECS Service**:
    - **name**: Replace the placeholder with the name of your ECS service.
    - **container_name**: Use the name container set in the task definition.
@@ -76,7 +76,7 @@ The application load balancer is created by the Terraform code in [/intTerraform
 2. Listener
    - The listener listens for traffic on port 80 and forwards it to the target group
 3. Target group
-   - The target group is a group of Fargate instances that the application load balancer forwards traffic to
+   - The target group is a group of resources (Tasks in a service) that the application load balancer forwards traffic to
 
 ### Changes to alb.tf
 
@@ -162,6 +162,8 @@ The application should be accessible at localhost:8000
 
 ### Docker Hub credentials
 
+Jenkins needs Docker Hub credentials to push the Docker image to Docker Hub. The credentials are added to Jenkins as a secret text credential.
+
 To generate a Docker Hub token, follow the steps below:
 
 - Navigate to Docker Hub
@@ -175,7 +177,7 @@ To generate a Docker Hub token, follow the steps below:
 
 ## Jenkins infrastructure and pipeline
 
-**The Jenkins infrastructure** is in a previously created VPC and subnet and is created with the Terraform code in [/Jenkins-tf](/jenkins-tf/)[(instructions for Terraform)](https://github.com/elmorenox/multi-region-banking-app-infrastructure?tab=readme-ov-file#terraform). Three EC2 instances are make up the Jenkins infrastructure.
+**The Jenkins infrastructure** is in a previously created VPC and subnet and is created with the Terraform code in [/Jenkins-tf](/jenkins-tf/)[(instructions for Terraform)](https://github.com/elmorenox/multi-region-banking-app-infrastructure?tab=readme-ov-file#terraform). Three EC2 instances make up the Jenkins infrastructure.
 
 ### Jenkins controller
 
@@ -332,6 +334,20 @@ The main.tf output the load balancer's url and you can access the application at
 
 Uncomment the destroy stage in the Jenkinsfile and push the changes to the main branch of the repository. The pipeline will be triggered and the VPC, cluster and application load balancer will be destroyed.
 
-## Issues 
+## Issues
+
+These are some issues that I ran into while building this project. 
+
+1. Jenkins user in the Jenkins controller EC2 instance needs to have rights over the SSH keys in order to authenticate against the agents. ```chmod 400 /var/lib/jenkins/.ssh/id_rsa``` fixes the issue and has been added to the ```jenkins-controller-install.sh``` script.
+
+2. The labels for the agents in the Jenkinsfile need to match the labels for the agents in the Jenkins dashboard. Originally the test and build agent was labeled 'awsDeploy' and the deploy agent was labeled 'awsDeploy2', so the deploy agent was being used for the test and build and failing. I changed the labels in the Jenkins dashboard to fix the issue.
+
+3. The load_data.py script can only be run once. The script loads data into the database. If the database is already populated with the users the containers will fail. The ```load_data.py``` script can be removed from the ```Dockerfile``` to fix the issue.
 
 ## Improvements
+
+1. A bastion host can be added in the public subnets to allow access to the private subnets. The bastion host can be used to ssh into the Fargate instances to troubleshoot issues.
+
+2. A cloudfront distribution can be added in front of the application load balancer to cache static content and improve performance.
+  
+

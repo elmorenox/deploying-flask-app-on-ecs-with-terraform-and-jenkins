@@ -29,8 +29,8 @@ sudo usermod -aG sudo jenkins || true
 
 sudo su - jenkins -c "
     ssh-keygen -t rsa -N '' -f /var/lib/jenkins/.ssh/id_rsa -q
-    sudo chmod 600 /var/lib/jenkins/.ssh/id_rsa
-    sudo chmod 600 /var/lib/jenkins/.ssh/id_rsa.pub
+    sudo chmod 400 /var/lib/jenkins/.ssh/id_rsa
+    sudo chmod 400 /var/lib/jenkins/.ssh/id_rsa.pub
 "
 
 

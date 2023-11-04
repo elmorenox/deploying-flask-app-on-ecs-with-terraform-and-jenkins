@@ -349,5 +349,3 @@ These are some issues that I ran into while building this project.
 1. A bastion host can be added in the public subnets to allow access to the private subnets. The bastion host can be used to ssh into the Fargate instances to troubleshoot issues.
 
 2. A cloudfront distribution can be added in front of the application load balancer to cache static content and improve performance.
-  
-
